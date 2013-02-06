@@ -1,0 +1,44 @@
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 10pt;
+}
+
+/* General widget styles */
+
+.widget {
+	border: 3px solid black;
+	margin: 3px;
+	width: 500px;
+}
+
+.widget h1 {
+	font-size: 12pt;
+	color: white;
+	background: black;
+	padding: 0;
+	margin: 0;
+}
+
+.widgetContent {
+	margin: 3px;
+}
+
+/* Styles for specific widgets */
+
+#searchGoogleBox {
+	width: 200px;
+}
+
+.goalAccomplished {
+	text-decoration: line-through;
+}
+
+#pageWeeks {
+	text-align: center;
+}
+
+.disabledLink {
+	color: gray;
+	text-decoration: none;
+	/* TODO: mouseover cursor is arrow, not hand */
+}
