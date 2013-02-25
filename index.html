@@ -3,18 +3,20 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="styles.css" type="text/css" /> 
 	<script type="text/JavaScript" src="jquery-1.8.2.min.js"></script>
-	<script type="text/JavaScript" src="chart.js"></script>
 	<script type="text/JavaScript" src="moment.min.js"></script>
-	<title>N.D.S.L.</title>
+	<script type="text/JavaScript" src="chart.js"></script>
+	<script type="text/JavaScript" src="script.js"></script>
+	<title>N.T.N.Y.</title>
 </head>
-<body onload="onPageLoad()">
+<body>
 	<div id="googleWidget" class="widget">
 		<h1>Search</h1>
 		<div class="widgetContent">
-			<input type="text" id="searchGoogleBox" />
-			<input type="button" id="searchGoogleButton" onclick="searchGoogle()" value="Search Google" />
-			<br />
-			<p><span id="siteKeywords"></span><small>[<a href="#" onClick="addSiteKeyword()">Add a site keyword</a>]</small></p>
+			<form id="searchGoogle">
+				<input type="text" id="searchGoogleBox" />
+				<input type="submit" id="searchGoogleButton" value="Search Google" />
+			</form>
+			<p><span id="siteKeywords"></span><small>[<a href="#" id="addSiteKeyword">Add a site keyword</a>]</small></p>
 		</div>
 	</div>
 	<div id="weeklyGoalsWidget" class="widget">
@@ -22,11 +24,11 @@
 		<div class="widgetContent">
 			<ul id="weeklyGoals">
 			</ul>
-			<div>
-				<input type="text" id="newWeeklyGoalBox" /><!-- TODO: Press enter to submit -->
-				<input type="button" id="newWeeklyGoalButton" onclick="newWeeklyGoalButtonClicked()" value="Add a new weekly goal" />
-			</div>
-			<div id="pageWeeks"><small><a href="#" id="viewPrevWeek" onclick="viewPrevWeek()">prev week</a> | <a href="#" id="viewNextWeek" onclick="viewNextWeek()">next week</a></small></div>
+			<form id="newWeeklyGoal">
+				<input type="text" id="newWeeklyGoalBox" />
+				<input type="submit" id="newWeeklyGoalButton" value="Add a new weekly goal" />
+			</form>
+			<div id="pageWeeks"><small><a href="#" id="viewPrevWeek">prev week</a> | <a href="#" id="viewNextWeek">next week</a></small></div>
 		</div>
 	</div>
 	<div id="carbsWidget" class="widget">
@@ -34,370 +36,13 @@
 		<div class="widgetContent">
 			<canvas id="carbsChart" width="400" height="200"></canvas>
 			<div>
-				<select id="month"></select>/<select id="day"></select>/<select id="year"></select><!-- TODO: Don't allow fictional dates -->
-				<input type="text" id="carbsTextBox" /><!-- TODO: press enter to submit -->
-				<input type="button" id="carbsButton" onclick="carbsButtonClicked()" value="Add carbs" />
+				<form id="newCarbsData">
+					<select id="month"></select>/<select id="day"></select>/<select id="year"></select>
+					<!-- TODO: Don't allow fictional dates -->
+					<input type="text" id="carbsTextBox" />
+					<input type="submit" id="carbsButton" value="Add carbs" />
+				</form>
 			</div>
 		</div>
 	</div>
-		
-	<script type="text/javascript" charset="utf-8">
-		
-		//set focus to search box
-		$("#searchGoogleBox").focus();
-		
-		//variable to store which week of goals is being viewed currently
-		var viewingWeek;
-		
-		function onPageLoad() {
-			loadSiteKeywords();
-			viewingWeek = moment().day(0).format("M/D/YYYY");
-			drawWeeklyGoalsList(viewingWeek);	
-			drawCarbsTracker();
-		}
-		
-		function loadSiteKeywords() {
-			//clear any children of the #siteKeywords that are already there
-			$("#siteKeywords").empty();
-			
-			//populate #siteKeywords from localStorage
-			var siteKeywords = getLocalData("siteKeywords");
-			for (key in siteKeywords) {
-				var siteName = key;
-				var siteUrl = siteKeywords[siteName];
-				var siteKeywordAppendage = "<a href='" + siteUrl + "'>" + siteName + "</a> "
-					+ "<small>[<a href='#' onClick='deleteSiteKeyword(\"" + siteName + "\")'>X</a>]</small> | ";
-				$("#siteKeywords").append(siteKeywordAppendage);
-			}
-		}
-		
-		function drawWeeklyGoalsList(week) {
-			//change widget header to current week
-			$("#weeklyGoalsWeek").html(viewingWeek);
-			
-			//clear any goals in #weeklyGoals already
-			$("#weeklyGoals").empty();
-			
-			//populate #weeklyGoals for specified week from localStorage
-			var weeklyGoals = getLocalData("weeklyGoals");
-			var thisWeeksGoals = weeklyGoals[week];
-			if (thisWeeksGoals == undefined) {
-				//if there are no goals for the week and never were...
-				$("#weeklyGoals").append("<li>There are no weekly goals yet.  Add one below!</li>");
-			} else if (thisWeeksGoals.length == 0) {
-				//if there were goals for the week but they were all deleted...
-				$("#weeklyGoals").append("<li>There are no weekly goals yet.  Add one below!</li>");
-			} else {
-				//if there are some goals for the week
-				var goals = "";
-				for (var i=0; i<thisWeeksGoals.length; i++) {
-					goals += "<li class='weeklyGoal'><input type='checkbox' "
-					goals += "onclick='weeklyGoalStatusChanged(" + i + ")' "
-					goals += thisWeeksGoals[i][1] ? "checked='true'" : "";
-					goals += "/><span id='goal-" + i + "' class='weeklyGoalText";
-					goals += thisWeeksGoals[i][1] ? " goalAccomplished" : "";
-					goals += "'>"+ thisWeeksGoals[i][0] + "</span>";
-					//TODO: make whole goal text clickable
-					goals += " <small>[<a href='#' onclick='deleteWeeklyGoal(" + i + ")'>Delete</a>]</small></li>"
-				}
-				$("#weeklyGoals").append(goals);				
-			}
-			
-			//disable "next" button if this is the current week
-			if (viewingWeek == moment().day(0).format("M/D/YYYY")) {
-				$("#viewNextWeek").attr("onclick", "")
-				$("#viewNextWeek").attr("class", "disabledLink");
-			} else {
-				$("#viewNextWeek").attr("onclick", "viewNextWeek()");
-				//TODO: Find way to remove entirely the class attribute in this case
-				$("#viewNextWeek").attr("class", "");
-			}
-		}
-			
-		function drawCarbsTracker() {
-			
-			//draw carbs chart
-			drawCarbsChart();
-			
-			var today = moment();
-			
-			//populate date picker - months
-			var months = "";
-			for (i=0; i<12; i++) {
-				months += "<option value='" + (i+1) +"'>" + (i+1) + "</option>"
-			}
-			$("#month").append(months).attr("value", today.month()+1);
-			
-			//populate date picker - days
-			var days = "";
-			for (i=0; i<today.daysInMonth(); i++) {
-				days += "<option value='" + (i+1) +"'>" + (i+1) + "</option>"
-			}
-			$("#day").append(days).attr("value", today.date());
-			
-			//populate date picker - years
-			var years = "";
-			for (i=2011; i<2022; i++) {
-				years += "<option value='" + (i+1) +"'>" + (i+1) + "</option>"
-			}
-			$("#year").append(years).attr("value", today.year());
-			
-			//empty carbs textbox
-			$("#carbsTextBox").attr("value", "");
-		}
-		
-		//TODO: Change number of days shown in day picker when month is changed
-		
-		
-		//DATA FUNCTIONS
-		
-		function getLocalData(objName) {
-			//objNames so far include "siteKeywords", "carbs", and "weeklyGoals"
-			if (localStorage[objName] == undefined) {
-				localStorage[objName] = "{}";
-			} else {
-				return JSON.parse(localStorage[objName])
-			}
-		}
-		
-		//sets a localStorage object (identified by objName) to a dictionary dict
-		function setLocalData(objName, dict) {
-			localStorage[objName] = JSON.stringify(dict);
-		}
-		
-		//add a key-value pair (appendage) to one of the localStorage dictionaries (identified by objName)
-		//appendance should be a table with a single key and a single value
-		function appendLocalData(objName, appendage) {
-			//possible types are the same as listed for getLocalData(objName)
-			if (localStorage[objName] != undefined) {
-				var dict = getLocalData(objName);
-				dict[appendage[0]] = appendage[1];
-				setLocalData(objName, dict);
-			} else {
-				alert("You're attempting to store data somewhere that can't be found.  There's an error.")
-			}
-		}
-		
-		//remove key-value pair (specified by key) from one of the localStorage objects (identified by objName)
-		function deleteLocalData(objName, key) {
-			//possible objNames are the same as listed for getLocalData(type)-- except for weeklyGoals
-			var dict = getLocalData(objName);
-			delete(dict[key]);
-			setLocalData(objName, dict);
-		}
-		
-		//remove item at index of key-value pair where the value is an array (identified by objName)
-		function deleteLocalData(objName, key, index) {
-			//possible objNames-- weeklyGoals
-			var dict = getLocalData(objName);
-			dict[key].splice(index, index+1);
-			setLocalData(objName, dict);
-		}
-				
-		
-		//LISTENERS
-		
-		//Search Google if Enter is pressed while typing in searchGoogleBox
-		$("#searchGoogleBox").keyup(function(event) {
-			if (event.keyCode == 13) { //if Enter is pressed
-				searchGoogle();
-			}
-		});
-		
-		function searchGoogle() {
-			var searchText = $("#searchGoogleBox").attr("value");
-			
-			//if searchText is a site keyword, go directly to the site URL
-			var keywords = getLocalData("siteKeywords");
-			if (keywords[searchText] != undefined) {
-				window.location.href = keywords[searchText];
-				return false;
-			} else if (searchText.split(" ").length == 1 &&
-			searchText.indexOf(".") >= 0) {
-				//if searchText is a URL (one word, contains a period)
-				window.location.href = "http://" + searchText;
-			} else {
-				// if searchText is not a keyword, search it on Google
-				window.location.href = "http://www.google.com/search?q=" + searchText;
-				return false;
-			}
-		}
-		
-		//Add a URL that you can go to from the "Search Google" textbox
-		function addSiteKeyword() {
-			
-			//prompt for site URL and name 
-			var siteUrl = prompt("What URL do you want to be able to access directly? (e.g. http://facebook.com)", "http://");
-			var siteName = prompt("What should you call the link to go there? (e.g. 'facebook')");
-			
-			//if both prompt boxes are filled out...
-			if (siteUrl != "" && siteName != "") {
-				appendLocalData("siteKeywords", [siteName, siteUrl])
-			} else {
-				alert("Something's wrong!  Site keyword not entered.");
-			}
-			
-			//now refresh the list of site keywords
-			loadSiteKeywords();
-		}
-		
-		function deleteSiteKeyword(siteName) {
-			//remove site keyword from localStorage
-			deleteLocalData("siteKeywords", siteName);
-			
-			//now refresh the list of site keywords
-			loadSiteKeywords();
-		}
-		
-		//checking or unchecking a weekly goal as completed
-		function weeklyGoalStatusChanged(goalIndex) {
-			//switch completed bit in weeklyGoals
-			var weeklyGoals = getLocalData("weeklyGoals");
-			weeklyGoals[viewingWeek][goalIndex][1] = !weeklyGoals[viewingWeek][goalIndex][1];
-			
-			//change HTML class of goal text to cross it off if accomplished
-			var classString = weeklyGoals[viewingWeek][goalIndex][1] ? "weeklyGoalText goalAccomplished" : "weeklyGoalText";
-			$("#goal-" + goalIndex).attr("class", classString);
-			
-			//save back localStorage goals data
-			setLocalData("weeklyGoals", weeklyGoals);
-		}
-		
-		function deleteWeeklyGoal(goalIndex) {
-			//remove particular goal from localStorage of particular week (viewingWeek)
-			deleteLocalData("weeklyGoals", viewingWeek, goalIndex);
-			
-			//now redraw the list of goals-- without the deleted goal this time
-			drawWeeklyGoalsList(viewingWeek);
-		}
-		
-		//Add goal if Enter is pressed while typing in newWeeklyGoalBox
-		$("#newWeeklyGoalBox").keyup(function(event) {
-			if (event.keyCode == 13) { //if Enter is pressed
-				newWeeklyGoalButtonClicked();
-			}
-		});
-		
-		function newWeeklyGoalButtonClicked() {
-			//set the initial variables defining the goal
-			var goal = $("#newWeeklyGoalBox").attr("value");
-			var dateString = viewingWeek;
-			var isAccomplished = false;
-			
-			//Ensure textbox is filled in
-			if (goal.length == 0) {
-				alert("Enter a goal to add.");
-				return;
-			}
-			
-			//Save data
-			var weeklyGoals = getLocalData("weeklyGoals");
-			if (weeklyGoals[dateString] == undefined) {
-				//no goals for that week yet
-				weeklyGoals[dateString] = [[goal, isAccomplished]];
-			} else {
-				weeklyGoals[dateString].push([goal, isAccomplished]);
-			}
-			setLocalData("weeklyGoals", weeklyGoals);
-			
-			//now redraw list of viewingWeek's goals
-			drawWeeklyGoalsList(viewingWeek);
-			
-			//TODO: Empty textbox
-			$("#newWeeklyGoalBox").attr("value", "");
-		}
-		
-		function viewPrevWeek() {
-			viewingWeek = moment(viewingWeek).subtract("days", 7).format("M/D/YYYY");
-			drawWeeklyGoalsList(viewingWeek);
-		}
-		
-		function viewNextWeek() {
-			viewingWeek = moment(viewingWeek).add("days", 7).format("M/D/YYYY");
-			drawWeeklyGoalsList(viewingWeek);
-		}
-		
-		//Add carbs data if Enter is pressed while typing in carbsTextBo
-		$("#carbsTextBox").keyup(function(event) {
-			if (event.keyCode == 13) { //if Enter is pressed
-				carbsButtonClicked();
-			}
-		});
-			
-		function carbsButtonClicked() {
-			var userInput = $("#carbsTextBox").attr("value");
-			if (isNaN(parseInt(userInput))) {
-				alert("Must enter an integer.")
-				return
-			} else {
-				var selectedDate = $("#month").attr("value") + "/" + $("#day").attr("value") + "/" + $("#year").attr("value");
-				//if entered date is real
-				if (moment(selectedDate).isValid()) {
-					//add date-carbs pair to localStorage
-					appendLocalData("carbs", [selectedDate, parseInt(userInput)]);
-										
-					//refresh #carbsChart with new data
-					drawCarbsChart();
-					
-					//TODO: When carbsChart is refreshed, the y-axis scale disappears
-					//and the x-axis scale shifts leftMargin to the left...
-					//On refresh it corrects itself.
-					
-				} else { //if entered date is NOT real...
-					alert("Must enter a valid date.");
-				}
-			}
-		}
-		
-		
-		//HELPERS
-		
-		function drawCarbsChart() {
-			var carbsDict = getLocalData("carbs");
-			
-			//Grab lifetime data; calculate average
-			var lifetimeAverage = calculateAverageOfValues(carbsDict);
-			
-			//Narrow data to last two weeks; calculate that average
-			var fortnightCarbsDict = {};
-			for (i=-14; i<1; i++) {
-				var date = moment().add("days",i).format("M/D/YYYY");
-				fortnightCarbsDict[date] = carbsDict[date];
-			}
-			var fortnightAverage = calculateAverageOfValues(fortnightCarbsDict);
-			
-			//Draw line chart
-			drawLineChart($("#carbsChart"), fortnightCarbsDict);
-			
-			//write averages
-			var c = $("#carbsChart")[0].getContext("2d");
-			var yPos = 14;
-			c.font = "14px Helvetica, Arial, sans-serif";
-			c.fillStyle = "#666";
-			c.textAlign = "end";
-			var canvasWidth = $("#carbsChart").attr("width");
-			var canvasHeight = $("#carbsChart").attr("height");
-			c.fillText("2-WEEK", canvasWidth - 5, yPos);
-			c.fillText("LIFETIME", canvasWidth - 5, yPos+40);
-			c.font = "bold 21px Helvetica";
-			c.fillText(fortnightAverage,canvasWidth - 5, yPos+20);
-			c.fillText(lifetimeAverage, canvasWidth - 5, yPos+60);
-		}
-		
-		function calculateAverageOfValues(dict) {
-			var total = 0;
-			var count = 0;
-
-			//cycle through days
-			for (key in dict) {
-				//if a day has carbs entered for it...
-				if (dict[key] != undefined) {
-					total += dict[key];
-					count += 1;
-				}
-			}
-			//return average carbs per day over dict's timeframe
-			return (total/count).toFixed(2);
-		}
-		</script>
 </body>

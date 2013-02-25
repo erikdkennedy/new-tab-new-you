@@ -36,6 +36,7 @@ function drawLineChart(canvas, dataDict) {
 	
 	//fill in guide lines
 	c.fillStyle = "gray";
+	c.textAlign = "start";
 	for (i=0; i<upperBound; i+=10) {
 		var y = chartHeight - scaling*i;
 		c.dashedLine(leftMargin, y, canvasWidth, y, 3);
