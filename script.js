@@ -9,7 +9,7 @@ $(document).ready(function() {
 	*/
 	
 	//to store week that's being viewed currently
-	var viewingWeek = moment().day(0).format("M/D/YYYY");
+	var viewingWeek = moment().day(0).format("M/D/YYYY"); //Sunday of the current week
 	
 	//initialize widgets from localStorage
 	loadSiteKeywords();
@@ -18,6 +18,7 @@ $(document).ready(function() {
 	
 	//set focus to search box
 	$("#searchGoogleBox").focus();
+	
 	
 	
 	//* * * * * WIDGET-DRAWING FUNCTIONS * * * * * * //
@@ -48,14 +49,14 @@ $(document).ready(function() {
 		//populate #weeklyGoals for specified week from localStorage
 		var weeklyGoals = getLocalData("weeklyGoals");
 		var thisWeeksGoals = weeklyGoals[week];
-		if (thisWeeksGoals == undefined) {
-			//if there are no goals for the week and never were...
+		
+		if (thisWeeksGoals == undefined) { //if there are no goals for the week and never were...
 			$("#weeklyGoals").append("<li>There are no weekly goals yet.  Add one below!</li>");
-		} else if (thisWeeksGoals.length == 0) {
-			//if there were goals for the week but they were all deleted...
+			
+		} else if (thisWeeksGoals.length == 0) { //if there were goals for the week but they were all deleted...
 			$("#weeklyGoals").append("<li>There are no weekly goals yet.  Add one below!</li>");
-		} else {
-			//if there are some goals for the week
+			
+		} else { //if there are some goals for the week
 			var goals = "";
 			for (var i=0; i<thisWeeksGoals.length; i++) {
 				goals += "<li class='weeklyGoal'>";
@@ -84,11 +85,10 @@ $(document).ready(function() {
 	}
 		
 	function drawCarbsTracker() {
-		
 		//draw carbs chart
 		drawCarbsChart();
 		
-		var today = moment();
+		var today = moment(); //for use in date picker controls
 		
 		//populate date picker - months
 		var months = "";
@@ -112,6 +112,7 @@ $(document).ready(function() {
 		$("#year").append(years).attr("value", today.year());
 	}
 	//TODO: Change number of days shown in day picker when month is changed
+	
 	
 	
 	//* * * * * * * *DATA FUNCTIONS * * * * * * * * //
@@ -155,9 +156,10 @@ $(document).ready(function() {
 		} 
 		setLocalData(objName, dict);
 	}
-			
 	
-	//LISTENERS
+		
+	
+	//* * * * * * * * * LISTENERS * * * * * * * * * //
 	
 	//SEARCH GOOGLE
 	//searches Google for whatever's in #searchGoogle input box
@@ -169,9 +171,11 @@ $(document).ready(function() {
 		if (keywords[searchText] != undefined) {
 			window.location.href = keywords[searchText];
 			return false;
+			
 		} else if (searchText.split(" ").length == 1 && searchText.indexOf(".") >= 0) {
 			//if searchText is a URL (one word, contains a period)
 			window.location.href = "http://" + searchText;
+			
 		} else {
 			//if searchText is not a keyword, search it on Google
 			window.location.href = "http://www.google.com/search?q=" + searchText;
@@ -310,9 +314,10 @@ $(document).ready(function() {
 			}
 		}
 	});
-			
 	
-	//HELPERS
+		
+	
+	//* * * * * * * * * * HELPERS * * * * * * * * * //
 	
 	function drawCarbsChart() {
 		var carbsDict = getLocalData("carbs");
