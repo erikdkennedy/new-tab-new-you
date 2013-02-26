@@ -198,7 +198,7 @@ $(document).ready(function() {
 			siteName = prompt("What should you call the link to go there? (e.g. 'facebook')");
 			
 			//if both prompt boxes are filled out...
-			if (siteName.length>1) {
+			if (siteName.length>0) {
 				appendLocalData("siteKeywords", [siteName, siteUrl])
 			
 				//now refresh the list of site keywords
