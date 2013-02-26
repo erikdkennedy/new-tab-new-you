@@ -32,7 +32,7 @@ $(document).ready(function() {
 		for (key in siteKeywords) {
 			var siteName = key;
 			var siteUrl = siteKeywords[siteName];
-			var siteKeywordAppendage = "<a href='" + siteUrl + "'>" + siteName + "</a> "
+			var siteKeywordAppendage = "<a href='" + siteUrl + "' title='" + siteUrl + "'>" + siteName + "</a> "
 				+ "<small>[<a href='#' class='deleteSiteKeyword' id='deleteSiteKeyword-" + siteName + "'>X</a>]</small> | ";
 			$("#siteKeywords").append(siteKeywordAppendage);
 		}
