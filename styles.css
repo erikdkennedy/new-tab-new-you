@@ -40,5 +40,5 @@ body {
 .disabledLink {
 	color: gray;
 	text-decoration: none;
-	/* TODO: mouseover cursor is arrow, not hand */
+	cursor: default;
 }

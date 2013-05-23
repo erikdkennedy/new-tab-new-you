@@ -76,11 +76,10 @@ $(document).ready(function() {
 		//disable "next" button if this is the current week
 		if (viewingWeek == moment().day(0).format("M/D/YYYY")) {
 			$("#viewNextWeek").attr("onclick", "")
-			$("#viewNextWeek").attr("class", "disabledLink");
+					.addClass("disabledLink");
 		} else {
 			$("#viewNextWeek").attr("onclick", "viewNextWeek()");
-			//TODO: Find way to remove entirely the class attribute in this case
-			$("#viewNextWeek").attr("class", "");
+					.removeClass("disabledLink");
 		}
 	}
 		
@@ -88,30 +87,49 @@ $(document).ready(function() {
 		//draw carbs chart
 		drawCarbsChart();
 		
-		var today = moment(); //for use in date picker controls
+		var date = moment(); //for use in date picker controls		
 		
 		//populate date picker - months
 		var months = "";
 		for (i=0; i<12; i++) {
-			months += "<option value='" + (i+1) +"'>" + (i+1) + "</option>"
+			months += "<option value='" + (i+1) +"'>" + (i+1) + "</option>";
 		}
-		$("#month").append(months).attr("value", today.month()+1);
+		$("#month").append(months).attr("value", date.month()+1);
 		
 		//populate date picker - days
 		var days = "";
-		for (i=0; i<today.daysInMonth(); i++) {
-			days += "<option value='" + (i+1) +"'>" + (i+1) + "</option>"
+		for (i=0; i<date.daysInMonth(); i++) {
+			days += "<option value='" + (i+1) +"'>" + (i+1) + "</option>";
 		}
-		$("#day").append(days).attr("value", today.date());
+		$("#day").append(days).attr("value", date.date());
 		
 		//populate date picker - years
 		var years = "";
 		for (i=2011; i<2022; i++) {
-			years += "<option value='" + (i+1) +"'>" + (i+1) + "</option>"
+			years += "<option value='" + (i+1) +"'>" + (i+1) + "</option>";
 		}
-		$("#year").append(years).attr("value", today.year());
+		$("#year").append(years).attr("value", date.year());
 	}
-	//TODO: Change number of days shown in day picker when month is changed
+	
+	//changes the number of days shown in day picker when month or year is changed
+	$("#month, #year").change(function() {
+		var month = $(this).val();
+		console.log("month: " + month);
+		var year = $("#year").val();
+		var daysInMonth = moment(year + "-" + month, "YYYY-MM").daysInMonth();
+		
+		//if the currently selected day is more than the number of days in the new month/year combo, bump it down
+		var day = $("#day").val() > daysInMonth ? daysInMonth : $("#day").val();
+		
+		$("#day").empty(); //remove options in #day
+		
+		//then repopulate #day with the new month's days
+		var days = "";
+		for (i=0; i<daysInMonth; i++) {
+			days += "<option value='" + (i+1) +"'>" + (i+1) + "</option>";
+		}
+		$("#day").append(days).attr("value", day);
+	});
 	
 	
 	
