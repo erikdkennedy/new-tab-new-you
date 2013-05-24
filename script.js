@@ -78,7 +78,7 @@ $(document).ready(function() {
 			$("#viewNextWeek").attr("onclick", "")
 					.addClass("disabledLink");
 		} else {
-			$("#viewNextWeek").attr("onclick", "viewNextWeek()");
+			$("#viewNextWeek").attr("onclick", "viewNextWeek()")
 					.removeClass("disabledLink");
 		}
 	}
