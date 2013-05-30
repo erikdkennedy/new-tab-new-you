@@ -8,6 +8,7 @@ $(document).ready(function() {
 		* HELPERS - Functions that are called in different places but don't fit anywhere else
 	*/
 	
+	
 	//to store week that's being viewed currently
 	var viewingWeek = moment().day(0).format("M/D/YYYY"); //Sunday of the current week
 	
@@ -16,8 +17,12 @@ $(document).ready(function() {
 	drawWeeklyGoalsList(viewingWeek);	
 	drawCarbsTracker();
 	
+	$("#searchGoogleBox").focus(function() {
+		console.log("focus received");
+	})
+	
 	//set focus to search box
-	$("#searchGoogleBox").focus();
+	$("#searchGoogleButton").focus();	
 	
 	
 	
