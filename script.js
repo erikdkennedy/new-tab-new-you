@@ -7,22 +7,17 @@ $(document).ready(function() {
 		* LISTENERS - Everything that responds to a click or form submission on the page
 		* HELPERS - Functions that are called in different places but don't fit anywhere else
 	*/
-	
-	
+
 	//to store week that's being viewed currently
 	var viewingWeek = moment().day(0).format("M/D/YYYY"); //Sunday of the current week
-	
+
 	//initialize widgets from localStorage
 	loadSiteKeywords();
 	drawWeeklyGoalsList(viewingWeek);	
 	drawCarbsTracker();
-	
-	$("#searchGoogleBox").focus(function() {
-		console.log("focus received");
-	})
-	
+
 	//set focus to search box
-	$("#searchGoogleButton").focus();	
+	$("#searchGoogleBox").focus();
 	
 	
 	
@@ -119,7 +114,6 @@ $(document).ready(function() {
 	//changes the number of days shown in day picker when month or year is changed
 	$("#month, #year").change(function() {
 		var month = $(this).val();
-		console.log("month: " + month);
 		var year = $("#year").val();
 		var daysInMonth = moment(year + "-" + month, "YYYY-MM").daysInMonth();
 		
@@ -252,8 +246,7 @@ $(document).ready(function() {
 		weeklyGoals[viewingWeek][goalIndex][1] = !weeklyGoals[viewingWeek][goalIndex][1];
 		
 		//change HTML class of goal text to cross it off if accomplished
-		var classString = weeklyGoals[viewingWeek][goalIndex][1] ? "weeklyGoalText goalAccomplished" : "weeklyGoalText";
-		$("#goal-" + goalIndex).attr("class", classString);
+		$("#goal-" + goalIndex).toggleClass("goalAccomplished");
 		
 		//save back localStorage goals data
 		setLocalData("weeklyGoals", weeklyGoals);
@@ -299,7 +292,7 @@ $(document).ready(function() {
 		drawWeeklyGoalsList(viewingWeek);
 		
 		//Empty textbox
-		$("#newWeeklyGoalBox").attr("value", "");
+		$("#newWeeklyGoalBox").val("");
 		
 		return false; //so form submit doesn't trigger anything
 	});
